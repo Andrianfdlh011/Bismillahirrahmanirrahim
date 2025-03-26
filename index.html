@@ -1,0 +1,94 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realtime Energy Monitoring</title>
+  <link rel="stylesheet" href="5.css">
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Realtime Energy Monitoring</h1>
+    <div class="logo">
+      <img src="unib.png" alt="Universitas Bengkulu" />
+      <p class="logo-text">PRODI TEKNIK ELEKTRO<br>FAKULTAS TEKNIK</p>
+    </div>
+    <div class="warning" id="warningBox">Beban Normal</div>
+    <div class="data">
+      <p><strong>Tegangan:</strong> <span id="voltage">Loading...</span> <small>(V)</small></p>
+      <p><strong>Arus (total):</strong> <span id="currentPZEM">Loading...</span> <small>(A)</small></p>
+      <p><strong>Daya:</strong> <span id="power">Loading...</span> <small>(Watt)</small></p>
+      <p><strong>F.daya:</strong> <span id="pf">Loading...</span></p>
+      <p><strong>Arus (sirkuit 1):</strong> <span id="currentSCT1">Loading...</span> <small>(A)</small></p>
+      <p><strong>Arus (sirkuit 2):</strong> <span id="currentSCT2">Loading...</span> <small>(A)</small></p>
+      <p><strong>Energi:</strong> <span id="energy">Loading...</span> <small>(Kwh)</small></p>
+      <p><strong>Biaya:</strong> <span id="cost">Loading...</span> <small>(Rupiah)</small></p>
+      <p><strong>Live:</strong> <span id="timestamp">Loading...</span></p>
+      <p><strong>Time:</strong> <span id="time">Loading...</span></p>
+      <div class="energy-warning" id="energyWarningBox">Energi Normal</div>
+      <img id="image-te" src="te.png" alt="Gambar TE" class="image-te">
+    </div>
+  </div>
+  <div class="chart-container">
+    <div class="chart-section" style="flex: 3;">
+      <iframe id="chartIframe" src="grafik_11_jam.html" title="Grafik Energi"></iframe>
+      <div class="button-group">
+        <button onclick="changeChart('grafik_11_jam.html')">Jam</button>
+        <div class="dropdown">
+          <button class="dropbtn">Hari</button>
+          <div class="dropdown-content">
+            <a href="#" onclick="changeChart('grafik_11_hari_1.html')">Per Menit</a>
+            <a href="#" onclick="changeChart('grafik_11_hari_2.html')">Per Jam</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropbtn">Kemarin</button>
+          <div class="dropdown-content">
+            <a href="#" onclick="changeChart('grafik_11_kemarin_1.html')">Per Menit</a>
+            <a href="#" onclick="changeChart('grafik_11_kemarin_2.html')">Per Jam</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropbtn">1 Minggu Terakhir</button>
+          <div class="dropdown-content">
+            <a href="#" onclick="changeChart('grafik_11_minggu_1.html')">Per Jam</a>
+            <a href="#" onclick="changeChart('grafik_11_minggu_2.html')">Per Hari</a>
+          </div>
+        </div>
+        <button onclick="changeChart('grafik_11_bulan_1.html')">Bulan</button>
+        <button onclick="changeChart('grafik_11_3_bulanterakhir.html')">3 Bulan Terakhir</button>
+        <button onclick="changeChart('grafik_11_tahun_1.html')">Tahun Kemarin</button>
+      </div>
+    </div>
+  </div>
+  <script src="tes14_1.js"></script>
+
+  <script>
+    // mengganti grafik
+    function changeChart(url) {
+      console.log("Tombol dipilih, menampilkan grafik dari: " + url);
+      document.getElementById('chartIframe').src = url;
+    }
+
+    //grafik jam sebagai default saat halaman dibuka
+    window.onload = function() {
+      document.getElementById('chartIframe').src = "grafik_11_jam.html";
+    }
+  </script>
+  <button class="toggle-button" onclick="toggleView()">Lihat Grafik</button>
+
+  <script>
+  function toggleView() {
+      document.body.classList.toggle('show-container2');
+      const button = document.querySelector('.toggle-button');
+      if (document.body.classList.contains('show-container2')) {
+          button.textContent = 'Live Monitoring';
+      } else {
+          button.textContent = 'Lihat Grafik';
+      }
+  }
+  </script>  
+</body>
+</html>

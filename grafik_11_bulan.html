@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafik Pengukuran Bulanan</title>
+  
+  <!-- Firebase Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { font-family: "Times New Roman", Times, serif; text-align: center; }
+    h1 { text-align: center; }
+    .chart-container { width: 100%; max-width: 1800px; height: 455px; margin: auto; }
+    canvas { width: 100% !important; height: 100% !important; }
+    .selector-container { position: absolute; top: 60px; left: 20px; display: inline-block; }
+    .selector-label { font-size: 16px; vertical-align: middle; }
+    #chartSelector { padding: 1px; font-size: 16px; margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Hasil Pengukuran Bulan Ini</h1>
+  
+  <div class="selector-container">
+    <label for="chartSelector" class="selector-label">Pilih Grafik:</label>
+    <select id="chartSelector" onchange="updateChart()">
+      <option value="voltageChart">Tegangan</option>
+      <option value="currentChart">Arus</option>
+      <option value="powerChart">Daya</option>
+      <option value="pfChart">Faktor Daya</option>
+      <option value="energyChart">Total Energi</option>
+    </select>
+  </div>
+  
+  <div class="chart-container">
+    <canvas id="chartCanvas"></canvas>
+  </div>
+  
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5A3lFBIE-H2YnOowzzYtY9uNx0QWLt2E",
+      authDomain: "bismillahirrahmanirrahim-ea734.firebaseapp.com",
+      databaseURL: "https://bismillahirrahmanirrahim-ea734-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bismillahirrahmanirrahim-ea734",
+      storageBucket: "bismillahirrahmanirrahim-ea734.appspot.com",
+      messagingSenderId: "467748329213",
+      appId: "1:467748329213:web:00ad9cac6e3f9e0753d094"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let chartInstance;
+    let dataset = {};
+    let labels = [];
+
+    // Fungsi untuk mendapatkan tanggal dari tanggal 1 hingga hari ini dalam format yyyy-mm-dd
+    function getCurrentMonthDates() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Bulan dalam format 2 digit
+      const daysInMonth = today.getDate(); // Hanya ambil sampai tanggal hari ini
+      const dates = [];
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = `${year}-${month}-${String(day).padStart(2, "0")}`;
+        dates.push(date);
+      }
+
+      return dates;
+    }
+
+    const currentMonthDates = getCurrentMonthDates();
+
+    function fetchData(callback) {
+      const ref = database.ref("AggregatedData_Perhari");
+      ref.once("value").then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          labels = [];
+          dataset = {
+            voltageChart: [],
+            currentChart: { total: [], SCT1: [], SCT2: [] },
+            powerChart: [],
+            pfChart: [],
+            energyChart: []
+          };
+
+          Object.keys(data).forEach(date => {
+            if (currentMonthDates.includes(date)) {
+              labels.push(date);
+              dataset.voltageChart.push(data[date].Average_Voltage);
+              dataset.currentChart.total.push(data[date].Average_Current_PZEM);
+              dataset.currentChart.SCT1.push(data[date].Average_Current_SCT1);
+              dataset.currentChart.SCT2.push(data[date].Average_Current_SCT2);
+              dataset.powerChart.push(data[date].Average_power);
+              dataset.pfChart.push(data[date].Average_pf);
+              dataset.energyChart.push(data[date].Total_Energy);
+            }
+          });
+
+          if (callback) callback();
+        }
+      });
+    }
+
+    function createChart(chartId, label) {
+      const ctx = document.getElementById("chartCanvas").getContext("2d");
+      if (chartInstance instanceof Chart) {
+        chartInstance.destroy();
+      }
+
+      const datasets = [];
+
+      if (chartId === "currentChart") {
+        datasets.push({ label: "Arus Total", data: dataset.currentChart.total, borderColor: "#FF5733", fill: false, tension: 0.1 });
+        datasets.push({ label: "Arus SCT1", data: dataset.currentChart.SCT1, borderColor: "#006400", fill: false, tension: 0.1 });
+        datasets.push({ label: "Arus SCT2", data: dataset.currentChart.SCT2, borderColor: "#3357FF", fill: false, tension: 0.1 });
+      } else {
+        datasets.push({ label: label, data: dataset[chartId], borderColor: "#FF5733", fill: false, tension: 0.1 });
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: { labels: labels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: "Tanggal" } },
+            y: { title: { display: true, text: label } }
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      const selectedChart = document.getElementById("chartSelector").value;
+      createChart(selectedChart, document.querySelector(`#chartSelector option[value="${selectedChart}"]`).textContent);
+    }
+
+    fetchData(() => { createChart("voltageChart", "Tegangan"); });
+    setInterval(() => { fetchData(() => { updateChart(); }); }, 20000);
+  </script>
+</body>
+</html>

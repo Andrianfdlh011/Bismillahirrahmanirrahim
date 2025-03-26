@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafik 1 Tahun Terakhir</title>
+  
+  <!-- Firebase Libraries -->
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { font-family: "Times New Roman", Times, serif; text-align: center; }
+    h1 { text-align: center; }
+    .chart-container { width: 100%; max-width: 1800px; height: 455px; margin: auto; }
+    canvas { width: 100% !important; height: 100% !important; }
+    .selector-container { position: absolute; top: 60px; left: 20px; display: inline-block; }
+    .selector-label { font-size: 16px; vertical-align: middle; }
+    #chartSelector { padding: 1px; font-size: 16px; margin-left: 1px; }
+
+    .selector-container {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      /* Susun vertikal */
+      align-items: flex-start;
+      /* Rata kiri */
+      z-index: 10;
+    }
+
+    .selector-label {
+      font-size: 16px;
+      margin-bottom: 3px;
+      /* Jarak antara label dan dropdown */
+    }
+
+    #chartSelector {
+      padding: 0.2px;
+      font-size: 15px;
+      width: 98px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 25px !important;
+        /* Pakai !important */
+        margin-top: 28px !important;
+        margin-bottom: 0px !important;
+        /* Tambah jarak ke bawah */
+      }
+
+      #subtitle {
+        font-size: 20px !important;
+        /* Pakai !important */
+        margin-top: 1px !important;
+        /* Tambah jarak ke atas */
+      }
+
+      .selector-container {
+        top: 60px;
+        left: 5px;
+      }
+
+      .selector-label {
+        font-size: 12px;
+        /* Lebih kecil untuk HP */
+      }
+
+      #chartSelector {
+        font-size: 10px;
+        width: 77px;
+      }
+
+      .chart-axis-label {
+        font-size: 10px !important;
+        /* Sesuaikan ukuran sesuai kebutuhan */
+      }
+    }
+</style>
+</head>
+<body>
+  <h1 id="chartTitle">Pengukuran Tegangan</h1>
+  <p id="subtitle"
+    style="font-size: 27px; font-family: 'Times New Roman', Times, serif; font-weight: bold; margin-top: -23px;">(Tahun Kemarin)</p>
+    
+  <div class="selector-container">
+    <label for="chartSelector" class="selector-label">Pilih Grafik:</label>
+    <select id="chartSelector" onchange="updateChart()">
+      <option value="voltageChart">Tegangan</option>
+      <option value="currentChart">Arus</option>
+      <option value="powerChart">Daya</option>
+      <option value="pfChart">Faktor Daya</option>
+      <option value="energyChart">Total Energi</option>
+    </select>
+  </div>
+  
+  <div class="chart-container">
+    <canvas id="chartCanvas"></canvas>
+  </div>
+  
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5A3lFBIE-H2YnOowzzYtY9uNx0QWLt2E",
+      authDomain: "bismillahirrahmanirrahim-ea734.firebaseapp.com",
+      databaseURL: "https://bismillahirrahmanirrahim-ea734-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bismillahirrahmanirrahim-ea734",
+      storageBucket: "bismillahirrahmanirrahim-ea734.appspot.com",
+      messagingSenderId: "467748329213",
+      appId: "1:467748329213:web:00ad9cac6e3f9e0753d094"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let chartInstance;
+    let dataset = {};
+    let labels = [];
+
+    // Fungsi untuk mendapatkan semua bulan dalam satu tahun sebelum tahun sekarang
+    function getPreviousYearMonths() {
+      const lastYear = new Date().getFullYear() - 1;
+      const months = [];
+
+      for (let month = 1; month <= 12; month++) {
+        months.push(`${lastYear}-${String(month).padStart(2, "0")}`);
+      }
+
+      return months;
+    }
+
+    const previousYearMonths = getPreviousYearMonths();
+
+    function fetchData(callback) {
+      const ref = database.ref("AggregatedData_Perbulan"); 
+      ref.once("value").then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          labels = [];
+          dataset = {
+            voltageChart: [],
+            currentChart: { total: [], SCT1: [], SCT2: [] },
+            powerChart: [],
+            pfChart: [],
+            energyChart: []
+          };
+
+          Object.keys(data).forEach(date => {
+            // Ambil data hanya jika termasuk dalam tahun sebelumnya
+            if (previousYearMonths.some(month => date.startsWith(month))) {
+              labels.push(date);
+              dataset.voltageChart.push(data[date].Average_Voltage);
+              dataset.currentChart.total.push(data[date].Average_Current_PZEM);
+              dataset.currentChart.SCT1.push(data[date].Average_Current_SCT1);
+              dataset.currentChart.SCT2.push(data[date].Average_Current_SCT2);
+              dataset.powerChart.push(data[date].Average_power);
+              dataset.pfChart.push(data[date].Average_pf);
+              dataset.energyChart.push(data[date].Total_Energy);
+            }
+          });
+
+          if (callback) callback();
+        }
+      });
+    }
+
+    function createChart(chartId, label) {
+      const ctx = document.getElementById("chartCanvas").getContext("2d");
+      if (chartInstance instanceof Chart) {
+        chartInstance.destroy();
+      }
+
+      const datasets = [];
+
+      if (chartId === "currentChart") {
+        datasets.push({ label: "Arus Total", data: dataset.currentChart.total, borderColor: "#FF5733", fill: false, tension: 0.1 });
+        datasets.push({ label: "Arus SCT1", data: dataset.currentChart.SCT1, borderColor: "#006400", fill: false, tension: 0.1 });
+        datasets.push({ label: "Arus SCT2", data: dataset.currentChart.SCT2, borderColor: "#3357FF", fill: false, tension: 0.1 });
+      } else {
+        datasets.push({ label: label, data: dataset[chartId], borderColor: "#FF5733", fill: false, tension: 0.1 });
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: { labels: labels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Bulan",
+                font: {
+                  size: window.innerWidth < 600 ? 16 : 20,
+                  weight: 'bold'
+                }
+              },
+              ticks: {
+                maxTicksLimit: 6, // Sesuaikan jumlah label yang ingin ditampilkan
+                autoSkip: true, // Melewati label yang terlalu rapat
+                font: {
+                  size: window.innerWidth < 600 ? 15 : 18,
+                  weight: 'bold'
+                }
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: label,
+                font: {
+                  size: window.innerWidth < 600 ? 15 : 20,
+                  weight: 'bold'
+                }
+              },
+              ticks: {
+                font: {
+                  size: window.innerWidth < 600 ? 15 : 18,
+                  weight: 'bold'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      const selectedChart = document.getElementById("chartSelector").value;
+      createChart(selectedChart, document.querySelector(`#chartSelector option[value="${selectedChart}"]`).textContent);
+    }
+
+    fetchData(() => { createChart("voltageChart", "Tegangan"); });
+  </script>
+        <script>
+          function updateChartTitle() {
+            const selectedChart = document.getElementById("chartSelector").value;
+            const titleElement = document.getElementById("chartTitle");  // Ambil elemen judul
+            const subtitleElement = document.getElementById("subtitle"); // Ambil elemen subjudul
+    
+            const titles = {
+             "voltageChart": "Pengukuran Tegangan",
+             "currentChart": "Pengukuran Arus",
+             "powerChart": "Pengukuran Daya",
+             "pfChart": "Pengukuran Faktor Daya",
+             "energyChart": "Pengukuran Total Energi"
+            };
+    
+            titleElement.textContent = titles[selectedChart] || "Hasil Bulan ini";
+            subtitleElement.textContent = "(Tahun Kemarin)";
+          }
+    
+            function updateChart() {
+            const selectedChart = document.getElementById("chartSelector").value;
+            createChart(selectedChart, document.querySelector(`#chartSelector option[value="${selectedChart}"]`).textContent);
+            updateChartTitle(); 
+          }
+        document.getElementById("chartSelector").addEventListener("change", updateChartTitle);
+      </script>
+</body>
+</html>

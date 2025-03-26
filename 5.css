@@ -1,0 +1,400 @@
+/* Latar belakang dan layout */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #c5cac5, #7c8d84);
+    color: #180303ea;
+    display: flex;
+    justify-content: center; /* Memusatkan konten */
+    align-items: flex-start;
+    height: 100vh;
+}
+
+/* Container utama */
+.container {
+    background-color: #c5cac5;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 22%; /* ukuran realtime */
+    margin-right: 2%;
+    margin-left:2%;
+    margin-top: 7.5px;
+}
+
+/* Header */
+h1 {
+    font-size: 1.26rem;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    color: #e91337;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Indikator data */
+.data {
+    font-size: 1.218rem;
+    line-height: 1.4;
+}
+
+.data p {
+    margin: 5px 0;
+}
+
+.data strong {
+    color: #021018;
+}
+
+.data span {
+    font-weight: bold;
+    color: #009688;
+    cursor: pointer;
+}
+
+.data span:hover {
+    text-decoration: underline;
+}
+
+/* Logo */
+.logo {
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* Teks di bawah logo */
+.logo-text {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Pengaturan gambar logo */
+.logo img {
+    max-width: 100px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Gaya indikator peringatan */
+.warning {
+    margin: 15px auto 0 auto;
+    padding: 10px;
+    background-color: green;
+    color: white;
+    font-size: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(34, 25, 6, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 300px;
+    display: none;
+}
+
+/* Pengaturan gambar TE */
+.image-te {
+    max-width: 130px;
+    height: auto;
+    display: block;
+    margin: 1pt auto 0 auto;
+}
+
+@media (max-width: 480px) {
+    .warning {
+        width: 90%;
+        font-size: 0.9rem;
+    }
+    .image-te {
+        max-height: 200px;
+    }
+}
+
+/* Ubah warna teks biaya menjadi merah */
+#cost {
+    color: red;
+}
+
+/* Menambahkan bagian grafik */
+.chart-container {
+    display: flex;
+    justify-content: center; /* Memusatkan grafik */
+    align-items: flex-start;
+    flex: 1;
+    height: 95vh;
+    width: 70%;
+    padding: 10px; /* lebih rapi */
+    margin-right:2%;
+}
+
+/* Pengaturan untuk bagian grafik */
+.chart-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Menggunakan ruang lebih banyak untuk grafik */
+    height: 100%; /* Menyesuaikan tinggi dengan kontainer */
+    width: 100%; /* Memanfaatkan seluruh lebar ruang */
+}
+
+/* Pengaturan iframe grafik */
+#chartIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Tombol untuk memilih jenis grafik */
+.button-group {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+}
+
+.button-group button,
+.button-group .dropbtn {
+    background-color: #d3aaaa8c;
+    color: rgba(3, 40, 58, 0.973);
+    padding: 10px 15px;
+    text-align: center;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.button-group .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 85px;
+    box-shadow: 0px 4px 8px rgba(7, 255, 19, 0.2);
+    z-index: 1;
+    left: 100%; /* Menampilkan dropdown di sebelah kanan tombol */
+    top: 0; /* Menjaga dropdown sejajar dengan tombol */
+    font-size: 12px;
+}
+
+.button-group button:hover,
+.button-group .dropbtn:hover {
+    background-color: #5759e6ce;
+}
+
+.button-group .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.button-group .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.button-group .dropdown-content a {
+    color: black;
+    padding: 5px 8px;
+    text-decoration: none;
+    display: block;
+}
+
+.button-group .dropdown-content a:hover {
+    background-color: #0b6cad;
+}
+
+/* Tombol untuk tampilan mobile di posisi kiri atas */
+.toggle-button {
+    display: none;
+    position: fixed;
+    top: 5px; /* Posisi 10px dari atas */
+    left: 5px; /* Posisi 10px dari kiri */
+    background-color: #405aee;
+    color: white;
+    padding: 2px 4px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(105, 99, 99, 0.664);
+    z-index: 1000; /* Pastikan tombol di atas konten lain */
+}
+
+/* Menampilkan tombol pada layar kecil */
+@media (max-width: 768px) {
+    .toggle-button {
+        display: block; /* Tombol hanya tampil di layar kecil */
+    }
+    
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    .chart-container {
+        display: none;
+        width: 100%;
+        height: 100vh;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .toggle-button {
+        display: block;
+    }
+}
+
+/* Saat tampilan mobile dan kontainer 2 aktif */
+.show-container2 .container {
+    display: none;
+}
+
+.show-container2 .chart-container {
+    display: flex;
+}
+
+/* Menampilkan tombol pada layar kecil */
+@media (max-width: 768px) {
+  .toggle-button {
+    display: block; /* Tombol hanya tampil di layar kecil */
+  }
+  
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .chart-container {
+    /* Mengatur container grafik agar tampil penuh pada layar kecil */
+    display: flex;
+    flex-direction: column;  /* susun secara vertikal */
+    width: 100%;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .chart-section {
+    display: flex;
+    flex-direction: column; /* pastikan grafik dan tombol tersusun secara vertikal */
+    flex: 1;
+    /* Mengurangi tinggi agar ruang tombol terlihat, misal 60px untuk tombol */
+    height: calc(100vh - 60px);
+    width: 100%;
+  }
+  
+  /* Pastikan iframe mengambil seluruh ruang yang dialokasikan untuk grafik */
+  #chartIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  
+  /* Atur tombol agar berada tepat di bawah grafik dan tetap dalam container grafik */
+  .button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* jika tombol perlu turun ke baris baru */
+    gap: 5px;
+    padding: 5px 0;
+    background-color: #f1f1f1; /* opsional, untuk pembeda */
+  }
+}
+
+/* Tambahkan media query khusus untuk layar kecil (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Pastikan kontainer grafik menggunakan tinggi penuh layar */
+    .chart-container {
+      display: none; /* default disembunyikan, namun akan muncul saat .show-container2 aktif */
+      width: 100%;
+      height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+    
+    /* Saat kontainer 2 aktif, tampilkan grafik dengan layout kolom */
+    .show-container2 .chart-container {
+      display: flex;
+    }
+    
+    /* Ubah .chart-section agar berorientasi kolom dan mengambil tinggi penuh */
+    .chart-section {
+      display: flex;
+      flex-direction: column;
+      height: 100%; /* tinggi penuh chart-container */
+      width: 100%;
+    }
+    
+    /* Atur iframe agar mengisi sisa ruang dan tombol tetap di bawah */
+    #chartIframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        overflow: hidden; /* Menghindari scrollbar */
+    }
+    
+    
+    /* Atur tampilan button-group agar tampil di bawah grafik */
+    .button-group {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap; /* agar tombol bisa turun ke baris baru jika ruang sempit */
+      justify-content: center;
+      padding: 2px;
+      background-color: #f0f0f0; /* opsional: background agar tombol lebih jelas terlihat */
+    }
+    
+    /* (Opsional) Sesuaikan ukuran tombol untuk layar kecil */
+    .button-group button,
+    .button-group .dropbtn {
+      padding: 6px 8px;
+      font-size: 12px;
+      margin: 3px;
+    }
+  }
+
+/* Gaya untuk warning box baru */
+.energy-warning {
+    margin: 4px auto; /* Memastikan posisi di tengah */
+    padding: 1.5px;
+    background-color: rgb(255, 102, 0);
+    color: white;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(34, 25, 6, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 300px;
+    display: none;
+}
+
+
+/* Menyesuaikan warning box untuk tampilan layar kecil */
+@media (max-width: 768px) {
+    .energy-warning {
+        width: 90%; /* Menggunakan 90% lebar layar */
+        font-size: 0.7rem; /* Ukuran font sedikit lebih besar */
+        padding: 5px; /* Memberikan padding lebih banyak untuk kenyamanan */
+    }
+    .button-group .dropdown-content a {
+        font-size: 12px; /* Ukuran font lebih kecil di layar HP */
+        padding: 1px 2px; /* Sesuaikan padding agar tetap rapi */
+    }
+    .button-group .dropdown-content {
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 80px;
+        box-shadow: 0px 4px 8px rgba(7, 255, 19, 0.2);
+        z-index: 1;
+        left: 50%; /* Pusatkan horizontal */
+        transform: translateX(-50%); /* Pusatkan horizontal */
+        top: 65%; /* Letakkan tepat di bawah tombol */
+        margin-top: 0px; /* Tambahkan sedikit jarak */
+        text-align: center;
+    }
+}
+  
